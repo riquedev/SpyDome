@@ -1,8 +1,8 @@
 import pathlib
-from typing import Iterator
 import os
 import subprocess
 import threading
+from datetime import datetime
 from django.conf import settings
 from django.core.files.base import ContentFile
 from django.db import models, connections
@@ -41,22 +41,23 @@ class Spider(TimeStampedModel, ActivatorModel):
         call.save()
         current_dir = os.getcwd()
         os.chdir(settings.SPY_FOLDER)
-        output = subprocess.run(args, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, encoding="utf-8")
+        process = subprocess.Popen(args, stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE, encoding="utf-8")
+        output, error = process.communicate()
         os.chdir(current_dir)
-        spy_finished.send(sender=self, output=output, call=call)
+        spy_finished.send(sender=self, output=output, error=error, call=call)
 
-    def initialize(self,is_test : bool = False):
+    def initialize(self, is_test: bool = False):
         call = SpiderCall.objects.create(spider=self)
         call.save()
         thread = None
 
         if not is_test:
-            thread = threading.Thread(target=self._initialize, args=(call.pk,))
+            thread = threading.Thread(target=self._initialize, args=(call.pk, False))
             thread.setDaemon(True)
             thread.start()
         else:
-            self._initialize(call.pk)
+            self._initialize(call.pk, True)
 
         return thread
 
@@ -82,8 +83,12 @@ class SpiderCall(TimeStampedModel):
 @receiver(spy_finished)
 def on_spy_finished(sender: Spider, **kwargs):
     output = kwargs['output']
+    error = kwargs['error']
     call = kwargs['call']
-    assert isinstance(output, subprocess.CompletedProcess)
+
+    assert isinstance(output, str)
+    assert isinstance(error, str)
     assert isinstance(call, SpiderCall)
-    call.stdout.save('stdout.log', ContentFile(output.stdout))
-    call.stderr.save('stderr.log', ContentFile(output.stderr))
+    ts = datetime.now().utcnow()
+    call.stdout.save(f'stdout-{ts}.log', ContentFile(output))
+    call.stderr.save(f'stderr-{ts}.log', ContentFile(error))
