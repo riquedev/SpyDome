@@ -1,3 +1,6 @@
+import sys
+import os
+from pathlib import Path
 # Scrapy settings for dome project
 #
 # For simplicity, this file contains only settings considered important or
@@ -6,6 +9,9 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+
+BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent
+sys.path.append(str(BASE_DIR))
 
 BOT_NAME = 'dome'
 

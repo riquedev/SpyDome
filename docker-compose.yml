@@ -1,0 +1,25 @@
+version: '3.5'
+
+services:
+  postgres:
+    container_name: spydome_postgres
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-spydome}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-spydome}
+      POSTGRES_DB: ${POSTGRES_DB:-spydome}
+      PGDATA: /data/postgres
+    volumes:
+       - spydome_postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - postgres
+    restart: unless-stopped
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+    spydome_postgres:
