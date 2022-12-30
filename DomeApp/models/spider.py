@@ -29,7 +29,7 @@ class Spider(TimeStampedModel, ActivatorModel):
     slug = AutoSlugField(populate_from=['name'])
     custom_settings = models.JSONField(default=dict)
     start_urls = models.ManyToManyField(SpyURL, through='SpiderStartUrl')
-    processes = models.ManyToManyField(SpiderProcess, through='SpiderProcessRelation')
+    processes = models.ManyToManyField(SpiderProcess, through='SpiderProcessRelation', related_name='spider_processes')
     spy = models.TextField(choices=Spy.choices, default=Spy.DEFAULT)
 
     @property
