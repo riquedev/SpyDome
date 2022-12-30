@@ -7,7 +7,6 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 from scrapy.http import Response
-
 from .base import BaseSpyPipeline
 
 

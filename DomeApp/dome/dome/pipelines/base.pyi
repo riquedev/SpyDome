@@ -1,7 +1,4 @@
 from typing import Optional
-
-from scrapy.http import Response
-
 from DomeApp.models import SpiderProcess
 
 
