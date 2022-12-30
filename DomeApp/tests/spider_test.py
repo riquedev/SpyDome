@@ -6,7 +6,10 @@ from DomeApp.dome.dome.spiders.spy import SpySpider
 
 class SpiderTest(TestCase):
     def setUp(self):
-        self.spider = Spider.objects.create(name="Test Spider")
+        self.spider = Spider.objects.create(
+            name="Test Spider",
+            processes=[]
+        )
         self.url1 = SpyURL.objects.create(url="https://github.com/")
         self.url2 = SpyURL.objects.create(url="https://stackoverflow.com/")
         SpiderStartUrl.objects.create(

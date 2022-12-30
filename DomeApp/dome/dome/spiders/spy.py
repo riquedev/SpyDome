@@ -28,5 +28,11 @@ class SpySpider(scrapy.Spider):
         self.start_urls = [url.url for url in self.spy.ordered_start_urls]
         super().__init__()
 
-    def parse(self, response):
-        print(response)
+    def parse(self, response, **kwargs):
+        new_response = response
+        last_pipeline = None
+
+        for process in self.spy.ordered_processes:
+            new_response = process.python_object.process_item(new_response, self, last_pipeline)
+            last_pipeline = process
+

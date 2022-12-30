@@ -12,6 +12,7 @@ from django_extensions.db.models import TimeStampedModel, ActivatorModel
 from django.utils.translation import gettext as _
 from django.dispatch import receiver
 from .urls import SpyURL
+from .process import SpiderProcess
 from DomeApp.signals import spy_finished
 
 
@@ -28,6 +29,7 @@ class Spider(TimeStampedModel, ActivatorModel):
     slug = AutoSlugField(populate_from=['name'])
     custom_settings = models.JSONField(default=dict)
     start_urls = models.ManyToManyField(SpyURL, through='SpiderStartUrl')
+    processes = models.ManyToManyField(SpiderProcess, through='SpiderProcessRelation')
     spy = models.TextField(choices=Spy.choices, default=Spy.DEFAULT)
 
     @property
@@ -35,8 +37,13 @@ class Spider(TimeStampedModel, ActivatorModel):
         return self.start_urls.order_by('spiderstarturl__order')
 
     @property
+    def ordered_processes(self) -> QuerySet[SpiderProcess]:
+        return self.processes.order_by('spiderprocessrelation__order')
+
+    @property
     def crawl_args(self) -> list:
         return ['scrapy', 'crawl', self.spy, '-a', f'id={self.pk}']
+
     def _initialize(self, call_id: int, testing: bool = False):
         os.environ['TEST'] = 'True' if testing else 'False'
         call = SpiderCall.objects.get(pk=call_id)
@@ -77,6 +84,16 @@ class SpiderStartUrl(models.Model):
     class Meta:
         ordering = ['order']
         unique_together = ('order', 'spider', 'url')
+
+
+class SpiderProcessRelation(models.Model):
+    order = models.PositiveIntegerField()
+    spider = models.ForeignKey('Spider', on_delete=models.CASCADE)
+    process = models.ForeignKey(SpiderProcess, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['order']
+        unique_together = ('order', 'spider', 'process')
 
 
 class SpiderCall(TimeStampedModel):
