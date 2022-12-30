@@ -5,7 +5,7 @@ import threading
 from datetime import datetime
 from django.conf import settings
 from django.core.files.base import ContentFile
-from django.db import models, connections
+from django.db import models, connection
 from django.db.models import QuerySet
 from django_extensions.db.fields import AutoSlugField
 from django_extensions.db.models import TimeStampedModel, ActivatorModel
@@ -34,13 +34,23 @@ class Spider(TimeStampedModel, ActivatorModel):
     def ordered_start_urls(self) -> QuerySet[SpyURL]:
         return self.start_urls.order_by('spiderstarturl__order')
 
+    @property
+    def crawl_args(self) -> list:
+        return ['scrapy', 'crawl', self.spy, '-a', f'id={self.pk}']
     def _initialize(self, call_id: int, testing: bool = False):
+        os.environ['TEST'] = 'True' if testing else 'False'
         call = SpiderCall.objects.get(pk=call_id)
-        args = ['scrapy', 'crawl', self.spy, '-a', f'id={self.pk}']
+        args = self.crawl_args
+
+        if testing:
+            args += ['-a', 'testing=1']
+
         call.args = args
         call.save()
         current_dir = os.getcwd()
         os.chdir(settings.SPY_FOLDER)
+
+        connection.commit()
         process = subprocess.Popen(args, stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE, encoding="utf-8")
         output, error = process.communicate()
@@ -50,14 +60,11 @@ class Spider(TimeStampedModel, ActivatorModel):
     def initialize(self, is_test: bool = False):
         call = SpiderCall.objects.create(spider=self)
         call.save()
-        thread = None
-
+        thread = call
         if not is_test:
-            thread = threading.Thread(target=self._initialize, args=(call.pk, False))
+            thread = threading.Thread(target=self._initialize, args=(call.pk, is_test))
             thread.setDaemon(True)
             thread.start()
-        else:
-            self._initialize(call.pk, True)
 
         return thread
 

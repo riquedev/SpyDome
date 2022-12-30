@@ -1,5 +1,8 @@
 from django.test import TestCase
 from DomeApp.models import (Spider, SpiderStartUrl, SpyURL)
+from DomeApp.models.spider import on_spy_finished, SpiderCall
+from scrapy.crawler import CrawlerProcess
+from DomeApp.dome.dome.spiders.spy import SpySpider
 
 class SpiderTest(TestCase):
     def setUp(self):
@@ -29,4 +32,16 @@ class SpiderTest(TestCase):
 
     def test_call_spy(self):
         thread = self.spider.initialize(is_test=True)
+        # i don't know how use a test connection in thread
+        # thread.join()
+        c = CrawlerProcess({'USER_AGENT': 'Mozilla/5.0', 'LOG_FILE': 'test_call_spy.log'})
+        c.crawl(SpySpider, id=self.spider.pk)
+        c.start()
+        kwargs = {
+            'output': open('test_call_spy.log', 'r').read(),
+            'error': '',
+            'call': thread
+        }
+        on_spy_finished(self.spider, **kwargs)
+
 
