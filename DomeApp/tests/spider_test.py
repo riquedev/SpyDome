@@ -1,7 +1,6 @@
 from django.test import TestCase
 from DomeApp.models import (Spider, SpiderStartUrl, SpyURL)
 
-
 class SpiderTest(TestCase):
     def setUp(self):
         self.spider = Spider.objects.create(name="Test Spider")
@@ -24,7 +23,10 @@ class SpiderTest(TestCase):
             'url', flat=True
         )
         qs_spider_urls = self.spider.start_urls.all().values_list('url', flat=True)
-
         self.assertEqual(list(qs_start_urls), list(qs_spider))
         self.assertNotEqual(list(qs_start_urls), list(qs_spider_urls))
         self.assertNotEqual(list(qs_spider), list(qs_spider_urls))
+
+    def test_call_spy(self):
+        thread = self.spider.initialize(is_test=True)
+
