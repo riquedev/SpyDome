@@ -13,7 +13,6 @@ class SpySpider(scrapy.Spider):
     name = 'spy'
 
     def get_spy(self, pk: int) -> Spider:
-        self.log(Spider.objects.all())
         return Spider.objects.get(pk=pk)
 
     def __init__(self, **kwargs):
@@ -35,4 +34,6 @@ class SpySpider(scrapy.Spider):
         for process in self.spy.ordered_processes:
             new_response = process.python_object.process_item(new_response, self, last_pipeline)
             last_pipeline = process
+
+        print(new_response, last_pipeline)
 

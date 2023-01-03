@@ -15,9 +15,9 @@ class PipelineNotExists(Exception):
 
 
 class SpiderProcess(TimeStampedModel, ActivatorModel):
-    spider = models.ForeignKey('Spider', on_delete=models.CASCADE)
     name = models.CharField(max_length=300, verbose_name=_("spider process name"))
     pipeline = models.CharField(max_length=300, verbose_name=_("pipeline name"))
+    params = models.JSONField(default=dict, blank=True, null=True)
 
     @classmethod
     def get_available_pipelines(cls):
@@ -26,6 +26,7 @@ class SpiderProcess(TimeStampedModel, ActivatorModel):
     @classmethod
     def get_pipeline_description(cls, pipeline):
         return cls._get_pipeline(pipeline, instance=False).__doc__
+
     @classmethod
     def get_html_description(cls, pipeline) -> BaseSpyPipeline:
         return cls._get_pipeline(pipeline, instance=False).__html__
@@ -43,6 +44,7 @@ class SpiderProcess(TimeStampedModel, ActivatorModel):
 
         if instance:
             obj = obj()
+
         return obj
 
     @property

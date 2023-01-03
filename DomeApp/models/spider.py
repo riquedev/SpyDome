@@ -68,6 +68,7 @@ class Spider(TimeStampedModel, ActivatorModel):
         call = SpiderCall.objects.create(spider=self)
         call.save()
         thread = call
+
         if not is_test:
             thread = threading.Thread(target=self._initialize, args=(call.pk, is_test))
             thread.setDaemon(True)

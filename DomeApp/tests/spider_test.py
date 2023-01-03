@@ -1,14 +1,29 @@
 from django.test import TestCase
-from DomeApp.models import (Spider, SpiderStartUrl, SpyURL)
+from DomeApp.models import (Spider, SpiderStartUrl, SpyURL, SpiderProcess)
 from DomeApp.models.spider import on_spy_finished, SpiderCall
 from scrapy.crawler import CrawlerProcess
 from DomeApp.dome.dome.spiders.spy import SpySpider
 
 class SpiderTest(TestCase):
     def setUp(self):
+        self.processes = [
+            SpiderProcess.objects.create(
+                name="BeautifulSoup Test",
+                pipeline="BeautifulSoupPipeline",
+                params=[
+                    {
+                        "method": "title",
+                    },
+                    {
+                        'method': 'text'
+                    }
+                ]
+            )
+        ]
         self.spider = Spider.objects.create(
-            name="Test Spider"
+            name="Test Spider",
         )
+        self.spider.processes.set(self.processes)
         self.url1 = SpyURL.objects.create(url="https://github.com/")
         self.url2 = SpyURL.objects.create(url="https://stackoverflow.com/")
         SpiderStartUrl.objects.create(
