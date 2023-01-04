@@ -6,10 +6,13 @@ from bootstrap import init_bootstrap
 init_bootstrap()
 
 from django.db import connection
-from DomeApp.models import Spider
+from DomeApp.models import (Spider, SpiderResult)
 
 
 class SpySpider(scrapy.Spider):
+    """
+    Basic Spider, uses a pure Scrapy.
+    """
     name = 'spy'
 
     def get_spy(self, pk: int) -> Spider:
@@ -30,10 +33,14 @@ class SpySpider(scrapy.Spider):
     def parse(self, response, **kwargs):
         new_response = response
         last_pipeline = None
+        result = None
 
         for process in self.spy.ordered_processes:
             new_response = process.python_object.process_item(new_response, self, last_pipeline)
+            result = SpiderResult.objects.create(
+                spider=self.spy,
+                parent_process=last_pipeline,
+                parent_result=result,
+                data=SpiderResult.jsonfy(new_response)
+            )
             last_pipeline = process
-
-        print(new_response, last_pipeline)
-

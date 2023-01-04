@@ -15,6 +15,10 @@ class PipelineNotExists(Exception):
 
 
 class SpiderProcess(TimeStampedModel, ActivatorModel):
+    """
+    This model is responsible for storing the details of a Spider process,
+    it is also responsible for handling communication between Scrapy and custom Pipelines.
+    """
     name = models.CharField(max_length=300, verbose_name=_("spider process name"))
     pipeline = models.CharField(max_length=300, verbose_name=_("pipeline name"))
     params = models.JSONField(default=dict, blank=True, null=True)

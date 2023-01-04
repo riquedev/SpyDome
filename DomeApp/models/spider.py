@@ -22,15 +22,29 @@ def spider_call_upload_to(instance: 'SpiderCall', file_name: str) -> str:
 
 
 class Spider(TimeStampedModel, ActivatorModel):
+    """
+    Spider's main model, here we have all the necessary relationships
+    to run our Spider, it's also where we centralize the build methods.
+    """
+
     class Spy(models.TextChoices):
         DEFAULT = 'spy', _("Default")
 
+    auth = models.ForeignKey('SpiderAuthentication', blank=True, null=True, on_delete=models.SET_NULL)
     name = models.CharField(max_length=300, verbose_name=_("spider name"))
     slug = AutoSlugField(populate_from=['name'])
     custom_settings = models.JSONField(default=dict)
     start_urls = models.ManyToManyField(SpyURL, through='SpiderStartUrl')
     processes = models.ManyToManyField(SpiderProcess, through='SpiderProcessRelation', related_name='spider_processes')
     spy = models.TextField(choices=Spy.choices, default=Spy.DEFAULT)
+
+    @property
+    def results(self) -> QuerySet['SpiderResult']:
+        return self.spiderresult_set.all()
+
+    @property
+    def last_result(self):
+        return self.results.last()
 
     @property
     def ordered_start_urls(self) -> QuerySet[SpyURL]:
@@ -62,6 +76,7 @@ class Spider(TimeStampedModel, ActivatorModel):
                                    stderr=subprocess.PIPE, encoding="utf-8")
         output, error = process.communicate()
         os.chdir(current_dir)
+
         spy_finished.send(sender=self, output=output, error=error, call=call)
 
     def initialize(self, is_test: bool = False):
@@ -78,9 +93,13 @@ class Spider(TimeStampedModel, ActivatorModel):
 
 
 class SpiderStartUrl(models.Model):
+    """
+    Relation between Spider and SpyURL.
+    It is necessary for us to be able to create an "order" of execution.
+    """
     order = models.PositiveIntegerField()
     spider = models.ForeignKey('Spider', on_delete=models.CASCADE)
-    url = models.ForeignKey(SpyURL, on_delete=models.CASCADE)
+    url = models.ForeignKey('SpyURL', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['order']
@@ -88,15 +107,23 @@ class SpiderStartUrl(models.Model):
 
 
 class SpiderProcessRelation(models.Model):
+    """
+    Relation between Spider and SpiderProcess.
+    It is necessary for us to be able to create an "order" of execution.
+    """
     order = models.PositiveIntegerField()
     spider = models.ForeignKey('Spider', on_delete=models.CASCADE)
-    process = models.ForeignKey(SpiderProcess, on_delete=models.CASCADE)
+    process = models.ForeignKey('SpiderProcess', on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['order']
         unique_together = ('order', 'spider', 'process')
 
+
 class SpiderCall(TimeStampedModel):
+    """
+    Model responsible for storing Spider's post-execution details.
+    """
     spider = models.ForeignKey('Spider', on_delete=models.CASCADE)
     args = models.JSONField(default=list)
     return_code = models.IntegerField(null=True, blank=True)

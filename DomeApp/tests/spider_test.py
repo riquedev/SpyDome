@@ -78,3 +78,4 @@ class SpiderTest(TestCase):
             'call': thread
         }
         on_spy_finished(self.spider, **kwargs)
+        print(self.spider.last_result.data)
