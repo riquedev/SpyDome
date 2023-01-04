@@ -6,8 +6,13 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
+from scrapy.http import Response
+from .base import BaseSpyPipeline
 
 
-class DomePipeline:
-    def process_item(self, item, spider):
+class DomePipeline(BaseSpyPipeline):
+    __doc__ = "This is a test Pipeline"
+    __html__ = "<b>test</b>"
+
+    def process_item(self, item, spider, last_pipeline: BaseSpyPipeline, last_response: Response):
         return item
