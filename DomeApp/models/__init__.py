@@ -8,7 +8,7 @@ from .result import (
     SpiderResult,
 )
 from .spider import (
-    Spider, SpiderStartUrl, SpiderCall
+    Spider, SpiderStartUrl, SpiderCall, SpiderProcessRelation
 )
 from .urls import (
     SpyURL,

@@ -1,7 +1,6 @@
 from typing import Optional
 from jsonschema import validate as _schema_validate
 
-
 class BaseSpyPipeline(object):
     __doc__ = ""
     __html__ = ""

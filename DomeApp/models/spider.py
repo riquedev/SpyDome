@@ -96,7 +96,6 @@ class SpiderProcessRelation(models.Model):
         ordering = ['order']
         unique_together = ('order', 'spider', 'process')
 
-
 class SpiderCall(TimeStampedModel):
     spider = models.ForeignKey('Spider', on_delete=models.CASCADE)
     args = models.JSONField(default=list)

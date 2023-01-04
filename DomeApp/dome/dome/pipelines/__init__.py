@@ -1,2 +1,2 @@
 from .example import DomePipeline
-from .beautifulsoup import BeautifulSoup
+from .beautifulsoup import BeautifulSoupPipeline

@@ -32,24 +32,24 @@ class SpiderProcess(TimeStampedModel, ActivatorModel):
         return cls._get_pipeline(pipeline, instance=False).__html__
 
     def save(self, **kwargs):
-        assert self.pipeline in _pipeline_names
+        assert self.pipeline in _pipeline_names, f"{self.pipeline} not found, only: {', '.join(_pipeline_names)} are available"
         return super().save(**kwargs)
 
     @classmethod
-    def _get_pipeline(cls, name: str, instance: bool = True) -> BaseSpyPipeline:
+    def _get_pipeline(cls, name: str, instance: bool = True, **kwargs) -> BaseSpyPipeline:
         obj = _pipeline_dict.get(name, None)
 
         if obj is None:
             raise PipelineNotExists(f"{name} not found, only: {', '.join(_pipeline_names)} are available")
 
         if instance:
-            obj = obj()
+            obj = obj(**kwargs)
 
         return obj
 
     @property
     def python_object(self) -> BaseSpyPipeline:
-        return self._get_pipeline(self.pipeline)
+        return self._get_pipeline(self.pipeline, params=self.params)
 
     class Meta:
         unique_together = ('name', 'pipeline')
