@@ -52,4 +52,4 @@ class SpiderProcess(TimeStampedModel, ActivatorModel):
         return self._get_pipeline(self.pipeline)
 
     class Meta:
-        unique_together = ('name', 'spider')
+        unique_together = ('name', 'pipeline')
