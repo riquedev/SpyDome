@@ -1,4 +1,4 @@
-<center><img src="docs/images/SpyDome.png?t=1672876862790" width="250"></center>
+<div style="text-align:center"><img src="docs/images/SpyDome.png?t=1672876862790" width="250"/></div>
 
 ---
 
