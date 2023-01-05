@@ -1,4 +1,4 @@
-<div style="text-align:center"><img src="docs/images/SpyDome.png?t=1672876862790" width="250"/></div>
+<img src="docs/images/SpyDome.png?t=1672876862790" width="250" align="center" alt="SpyDome Logo"/>
 
 ---
 
