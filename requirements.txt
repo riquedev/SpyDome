@@ -1,5 +1,5 @@
 beautifulsoup4==4.11.1
-Django==4.1.5
+Django==4.1.7
 django_environ==0.9.0
 django_extensions==3.2.1
 django_mirage_field==1.4.0
